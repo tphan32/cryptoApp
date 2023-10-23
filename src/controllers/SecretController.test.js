@@ -18,8 +18,6 @@ jest.mock("../services/FileService.ts", () => {
 describe("SecretController", () => {
     const secretFromRequest = decryptedData;
     const secret = "secret";
-    const algorithm = "algorithm";
-    const key = "key";
     const { mockStatus, mockRes, mockSend } = createMockTestSuite();
 
     beforeEach(() => {
@@ -28,7 +26,7 @@ describe("SecretController", () => {
     })
 
     describe("storeSecret", () => {
-        const mockReq = { body: { secret, algorithm, key } };
+        const mockReq = { body: { secret } };
         it("should return encrypted data when calling with valid arguments", async () => {
             CryptoService.encrypt.mockReturnValue(encryptedData);
             await SecretController.storeSecret(mockReq, mockRes);
@@ -37,15 +35,10 @@ describe("SecretController", () => {
 
 
         it("should call CryptoService.encrypt with proper arguments", async () => {
-            const spiedCryptoServiceEncrypt = jest.spyOn(
-                CryptoService,
-                "encrypt"
-            ).mockReturnValue(encryptedData);
+            const spiedCryptoServiceEncrypt = jest.spyOn(CryptoService, "encrypt").mockReturnValue(encryptedData);
             await SecretController.storeSecret(mockReq, mockRes);
             expect(spiedCryptoServiceEncrypt).toBeCalledWith(
-                secret,
-                algorithm,
-                key
+                secret
             );
         });
 
@@ -58,7 +51,7 @@ describe("SecretController", () => {
     });
 
     describe("validateSecret", () => {
-        const mockReq = { body: { secretFromRequest, algorithm, key } };
+        const mockReq = { body: { secretFromRequest } };
         it('should return true when incoming secret matches the stored secret', async () => {
             CryptoService.decrypt.mockReturnValue(decryptedData);
             await SecretController.validateSecret(mockReq, mockRes);
@@ -72,15 +65,10 @@ describe("SecretController", () => {
         })
 
         it('should call CryptoService.decrypt with proper arguments', async () => {
-            const spiedCryptoServiceDecrypt = jest.spyOn(
-                CryptoService,
-                "decrypt"
-            ).mockReturnValue(decryptedData);
+            const spiedCryptoServiceDecrypt = jest.spyOn(CryptoService, "decrypt").mockReturnValue(decryptedData);
             await SecretController.validateSecret(mockReq, mockRes);
             expect(spiedCryptoServiceDecrypt).toBeCalledWith(
-                encryptedData,
-                algorithm,
-                key
+                encryptedData
             );
         })
 
