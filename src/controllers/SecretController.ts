@@ -23,23 +23,19 @@ const storeSecret = async (req: Request, res: Response) => {
 const validateSecret = async (req: Request, res: Response) => {
     const logPrefix = "SecretController.validateSecret";
     const {
-        encryptedData: encryptedDataFromRequest,
+        secretFromRequest,
         algorithm,
         key,
     } = req.body;
 
     try {
         const encryptedDataFromFile = FileService.readFromFile();
-        const secretFromRequest = CryptoService.decrypt(
-            encryptedDataFromRequest,
-            algorithm,
-            key
-        );
         const secretFromFile = CryptoService.decrypt(
             encryptedDataFromFile,
             algorithm,
             key
         );
+        console.log(secretFromFile);
         console.info(logPrefix + ": Successfully verified the secret");
         return res.send({
             secretMatched: secretFromRequest === secretFromFile,
