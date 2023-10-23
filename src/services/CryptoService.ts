@@ -1,11 +1,13 @@
 import crypto from "crypto";
+import config from "../utils/config";
 
-const encrypt = (secret: string, algorithm: string, key: Buffer): string => {
+const encrypt = (secret: string): string => {
     const logPrefix = "CryptoService.encrypt";
+    const key: Buffer = crypto.scryptSync(config.key, config.salt, 32);
 
     try {
         const iv = crypto.randomBytes(16);
-        const cipher = crypto.createCipheriv(algorithm, key, iv);
+        const cipher = crypto.createCipheriv(config.algorithm, key, iv);
         let encryptedData = cipher.update(secret);
         encryptedData = Buffer.concat([encryptedData, cipher.final()]);
         console.info(logPrefix + ": Successfully encrypted the data");
@@ -16,17 +18,15 @@ const encrypt = (secret: string, algorithm: string, key: Buffer): string => {
     }
 };
 
-const decrypt = (
-    encryptedData: string,
-    algorithm: string,
-    key: Buffer
-): string | null => {
+const decrypt = (encryptedData: string): string | null => {
     const logPrefix = "CryptoService.decrypt";
 
     try {
         const [iv, encryptedSecret] = encryptedData.split(".");
+        const key: Buffer = crypto.scryptSync(config.key, config.salt, 32);
+
         const decipher = crypto.createDecipheriv(
-            algorithm,
+            config.algorithm,
             key,
             Buffer.from(iv, "hex")
         );

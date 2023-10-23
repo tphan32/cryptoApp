@@ -4,10 +4,10 @@ import FileService from "../services/FileService";
 
 const storeSecret = async (req: Request, res: Response) => {
     const logPrefix = "SecretController.storeSecret";
-    const { secret, algorithm, key } = req.body;
+    const { secret } = req.body;
 
     try {
-        const encryptedData = CryptoService.encrypt(secret, algorithm, key);
+        const encryptedData = CryptoService.encrypt(secret);
         if (encryptedData) {
             FileService.writeToFile(encryptedData);
             console.info(logPrefix + ": Successfully stored the secret");
@@ -22,20 +22,11 @@ const storeSecret = async (req: Request, res: Response) => {
 
 const validateSecret = async (req: Request, res: Response) => {
     const logPrefix = "SecretController.validateSecret";
-    const {
-        secretFromRequest,
-        algorithm,
-        key,
-    } = req.body;
+    const { secretFromRequest } = req.body;
 
     try {
         const encryptedDataFromFile = FileService.readFromFile();
-        const secretFromFile = CryptoService.decrypt(
-            encryptedDataFromFile,
-            algorithm,
-            key
-        );
-        console.log(secretFromFile);
+        const secretFromFile = CryptoService.decrypt(encryptedDataFromFile);
         console.info(logPrefix + ": Successfully verified the secret");
         return res.send({
             secretMatched: secretFromRequest === secretFromFile,
